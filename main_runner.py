@@ -42,7 +42,7 @@ def download_postman_collection():
 #     print("Environment downloaded and saved as environment.json")
 
 def run_newman_test(company_name, failure_summary):
-    print(f"\n🚀 Running test for: {company_name}")
+    print(f"\nRunning test for: {company_name}")
 
     # Safe file and folder names
     safe_name = company_name.replace(" ", "_").replace("&", "")
@@ -74,9 +74,9 @@ def run_newman_test(company_name, failure_summary):
     with open(stdout_log, "w") as out, open(stderr_log, "w") as err:
         try:
             subprocess.run(command, check=True, stdout=out, stderr=err, text=True)
-            print(f"✅ Newman test passed for {company_name}")
+            print(f"Newman test passed for {company_name}")
         except subprocess.CalledProcessError:
-            print(f"❌ Newman test failed for {company_name}")
+            print(f"Newman test failed for {company_name}")
             if os.path.exists(result_file):
                 with open(result_file) as f:
                     result_data = json.load(f)
