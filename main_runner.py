@@ -7,8 +7,20 @@ import requests
 POSTMAN_API_KEY = os.getenv('POSTMAN_API_KEY')
 COLLECTION_UID = os.getenv('COLLECTION_UID')
 BASE_URL = os.getenv('BASE_URL')
-AUTH_TOKEN = os.getenv('AUTH_TOKEN')
+WEB_TOKEN = os.getenv('WEB_TOKEN')
 EMAIL = os.getenv('Email')
+
+
+AUTH_TOKEN = {
+    "email": EMAIL,
+    "webToken": WEB_TOKEN
+}
+
+# Convert to a double-escaped string so it survives shell parsing
+auth_token_str = json.dumps(AUTH_TOKEN)
+
+import pdb;pdb.set_trace()
+
 
 def download_postman_collection():
     print("📥 Downloading Postman collection...")
@@ -32,8 +44,7 @@ def run_newman_test(company_name, failure_summary):
     command = [
         "newman", "run", "collection.json",
         "--env-var", f"base_url={BASE_URL}",
-        "--env-var", f"Auth-Token={AUTH_TOKEN}",
-        "--env-var", f"EMAIL={EMAIL}",
+        "--env-var", f"Auth-Token={auth_token_str}",
         "--global-var", f"companyName={company_name}",
         "--reporters", "json,htmlextra",
         "--reporter-json-export", result_file,
