@@ -8,6 +8,7 @@ POSTMAN_API_KEY = os.getenv('POSTMAN_API_KEY')
 COLLECTION_UID = os.getenv('COLLECTION_UID')
 BASE_URL = os.getenv('BASE_URL')
 AUTH_TOKEN = os.getenv('AUTH_TOKEN')
+EMAIL = os.getenv('Email')
 
 def download_postman_collection():
     print("📥 Downloading Postman collection...")
@@ -32,6 +33,7 @@ def run_newman_test(company_name, failure_summary):
         "newman", "run", "collection.json",
         "--env-var", f"base_url={BASE_URL}",
         "--env-var", f"Auth-Token={AUTH_TOKEN}",
+        "--env-var", f"EMAIL={EMAIL}",
         "--global-var", f"companyName={company_name}",
         "--reporters", "json,htmlextra",
         "--reporter-json-export", result_file,
