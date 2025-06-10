@@ -42,14 +42,11 @@ def run_newman_test(company_name, failure_summary):
     os.makedirs(html_dir, exist_ok=True)
 
     command = [
-        "newman", "run", "collection.json",
+        "npx", "newman", "run", "collection.json",
         "-e", "environment.json",
         "--global-var", f"companyName={company_name}",
-        "--reporters", "json,htmlextra",
-        "--reporter-json-export", result_file,
-        "--reporter-htmlextra-export", html_report,
-        "--reporter-htmlextra-title", f"Report for {company_name}",
-        "--reporter-htmlextra-darkTheme", "true"
+        "--reporters", "htmlextra",
+        "--reporter-htmlextra-export", "results/htmlextra-report/report.html"
     ]
 
     # Redirect output to log files to prevent Jenkins crash
