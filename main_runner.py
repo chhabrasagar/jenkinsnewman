@@ -8,7 +8,7 @@ POSTMAN_API_KEY = os.getenv('POSTMAN_API_KEY')
 COLLECTION_UID = os.getenv('COLLECTION_UID')
 BASE_URL = os.getenv('BASE_URL')
 WEB_TOKEN = os.getenv('WEB_TOKEN')
-EMAIL = os.getenv('Email')
+EMAIL = os.getenv('EMAIL')
 
 
 AUTH_TOKEN = {
