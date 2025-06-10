@@ -32,7 +32,7 @@ def download_postman_environment():
     print("Environment downloaded and saved as environment.json")
 
 def run_newman_test(company_name, failure_summary):
-    print(f"\n🚀 Running test for: {company_name}")
+    print(f"\n Running test for: {company_name}")
 
     # Safe file and folder names
     safe_name = company_name.replace(" ", "_").replace("&", "")
