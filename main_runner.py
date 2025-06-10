@@ -87,7 +87,7 @@ def run_newman_test(company_name, failure_summary):
 def main():
     try:
         download_postman_collection()
-        download_postman_environment()
+        # download_postman_environment()
     except requests.HTTPError as e:
         print(f"Error downloading collection or environment: {e}")
         sys.exit(1)
