@@ -46,7 +46,8 @@ def run_newman_test(company_name, failure_summary):
 
     command = [
         "newman", "run", "collection.json",
-        "-e", "environment.json",
+        "--env-var", f"base_url={BASE_URL}",
+        "--env-var", f"Auth-Token={auth_token}",
         "--global-var", f"companyName={company_name}",
         "--reporters", "json,htmlextra",
         "--reporter-json-export", result_file,
