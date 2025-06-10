@@ -19,8 +19,6 @@ AUTH_TOKEN = {
 # Convert to a double-escaped string so it survives shell parsing
 auth_token_str = json.dumps(AUTH_TOKEN)
 
-import pdb;pdb.set_trace()
-
 
 def download_postman_collection():
     print("📥 Downloading Postman collection...")
