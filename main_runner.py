@@ -10,7 +10,7 @@ COLLECTION_UID = '43612186-ee747e79-3b13-4b5d-a0fb-0ab65e5eb73c'
 ENV_UID = '43612186-c1b130eb-94b4-4aab-bf36-53c2f914e946'
 
 def download_postman_collection():
-    print("⬇️  Downloading Postman collection...")
+    print("Downloading Postman collection...")
     url = f"https://api.getpostman.com/collections/{COLLECTION_UID}"
     headers = {"X-Api-Key": POSTMAN_API_KEY}
     response = requests.get(url, headers=headers)
@@ -18,10 +18,10 @@ def download_postman_collection():
     collection_data = response.json()
     with open("collection.json", "w") as f:
         json.dump(collection_data, f)
-    print("📁 Collection downloaded and saved as collection.json")
+    print("Collection downloaded and saved as collection.json")
 
 def download_postman_environment():
-    print("⬇️  Downloading Postman environment...")
+    print("Downloading Postman environment...")
     url = f"https://api.getpostman.com/environments/{ENV_UID}"
     headers = {"X-Api-Key": POSTMAN_API_KEY}
     response = requests.get(url, headers=headers)
@@ -29,7 +29,7 @@ def download_postman_environment():
     env_data = response.json()
     with open("environment.json", "w") as f:
         json.dump(env_data, f)
-    print("📁 Environment downloaded and saved as environment.json")
+    print("Environment downloaded and saved as environment.json")
 
 def run_newman_test(company_name, failure_summary):
     print(f"\n🚀 Running test for: {company_name}")
@@ -59,9 +59,9 @@ def run_newman_test(company_name, failure_summary):
     with open(stdout_log, "w") as out, open(stderr_log, "w") as err:
         try:
             subprocess.run(command, check=True, stdout=out, stderr=err, text=True)
-            print(f"✅ Newman test passed for {company_name}")
+            print(f"Newman test passed for {company_name}")
         except subprocess.CalledProcessError:
-            print(f"❌ Newman test failed for {company_name}")
+            print(f"Newman test failed for {company_name}")
             if os.path.exists(result_file):
                 with open(result_file) as f:
                     result_data = json.load(f)
@@ -85,17 +85,17 @@ def main():
         download_postman_collection()
         download_postman_environment()
     except requests.HTTPError as e:
-        print(f"❌ Error downloading collection or environment: {e}")
+        print(f"Error downloading collection or environment: {e}")
         sys.exit(1)
 
     if not os.path.exists("companies.json"):
-        print("❌ companies.json not found. Please provide the file with company names.")
+        print("companies.json not found. Please provide the file with company names.")
         sys.exit(1)
 
     with open("companies.json") as f:
         companies = json.load(f)
 
-    print(f"\n📦 Total companies to process: {len(companies)}")
+    print(f"\n Total companies to process: {len(companies)}")
     os.makedirs("results/htmlextra-reports", exist_ok=True)
 
     failure_summary = []
@@ -107,9 +107,9 @@ def main():
     if failure_summary:
         with open("failed_tests_summary.json", "w") as f:
             json.dump(failure_summary, f, indent=2)
-        print(f"\n📋 Failure summary: {len(failure_summary)} failed tests written to failed_tests_summary.json")
+        print(f"\n Failure summary: {len(failure_summary)} failed tests written to failed_tests_summary.json")
     else:
-        print("\n✅ All Newman tests completed successfully.")
+        print("\n All Newman tests completed successfully.")
 
 if __name__ == "__main__":
     main()
