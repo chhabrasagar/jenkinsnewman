@@ -10,7 +10,7 @@ import requests
 # ENV_UID = '43612186-c1b130eb-94b4-4aab-bf36-53c2f914e946'
 POSTMAN_API_KEY = os.getenv('POSTMAN_API_KEY')
 COLLECTION_UID = os.getenv('COLLECTION_UID')
-ENV_UID = os.getenv('ENV_UID')
+# ENV_UID = os.getenv('ENV_UID')
 
 def download_postman_collection():
     print("Downloading Postman collection...")
@@ -23,16 +23,16 @@ def download_postman_collection():
         json.dump(collection_data, f)
     print("Collection downloaded and saved as collection.json")
 
-def download_postman_environment():
-    print("Downloading Postman environment...")
-    url = f"https://api.getpostman.com/environments/{ENV_UID}"
-    headers = {"X-Api-Key": POSTMAN_API_KEY}
-    response = requests.get(url, headers=headers)
-    response.raise_for_status()
-    env_data = response.json()
-    with open("environment.json", "w") as f:
-        json.dump(env_data, f)
-    print("Environment downloaded and saved as environment.json")
+# def download_postman_environment():
+#     print("Downloading Postman environment...")
+#     url = f"https://api.getpostman.com/environments/{ENV_UID}"
+#     headers = {"X-Api-Key": POSTMAN_API_KEY}
+#     response = requests.get(url, headers=headers)
+#     response.raise_for_status()
+#     env_data = response.json()
+#     with open("environment.json", "w") as f:
+#         json.dump(env_data, f)
+#     print("Environment downloaded and saved as environment.json")
 
 def run_newman_test(company_name, failure_summary):
     print(f"\n Running test for: {company_name}")
