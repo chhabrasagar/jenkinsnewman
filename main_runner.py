@@ -5,9 +5,12 @@ import sys
 import requests
 
 # Postman API details
-POSTMAN_API_KEY = 'PMAK-684680352c35f10001b70943-ef03e4f308962aca5b3a25d2e17cb100ea'
-COLLECTION_UID = '43612186-ee747e79-3b13-4b5d-a0fb-0ab65e5eb73c'
-ENV_UID = '43612186-c1b130eb-94b4-4aab-bf36-53c2f914e946'
+# POSTMAN_API_KEY = 'PMAK-684680352c35f10001b70943-ef03e4f308962aca5b3a25d2e17cb100ea'
+# COLLECTION_UID = '43612186-ee747e79-3b13-4b5d-a0fb-0ab65e5eb73c'
+# ENV_UID = '43612186-c1b130eb-94b4-4aab-bf36-53c2f914e946'
+POSTMAN_API_KEY = os.getenv('POSTMAN_API_KEY')
+COLLECTION_UID = os.getenv('COLLECTION_UID')
+ENV_UID = os.getenv('ENV_UID')
 
 def download_postman_collection():
     print("Downloading Postman collection...")
