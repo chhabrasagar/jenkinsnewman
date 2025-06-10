@@ -15,9 +15,10 @@ def download_postman_collection():
     headers = {"X-Api-Key": POSTMAN_API_KEY}
     response = requests.get(url, headers=headers)
     response.raise_for_status()
+    collection_data = response.json()
     with open("collection.json", "w") as f:
-        json.dump(response.json(), f)
-    print("Collection downloaded and saved as collection.json")
+        json.dump(collection_data, f)
+    print("📁 Collection downloaded and saved as collection.json")
 
 def download_postman_environment():
     print("⬇️  Downloading Postman environment...")
@@ -25,77 +26,90 @@ def download_postman_environment():
     headers = {"X-Api-Key": POSTMAN_API_KEY}
     response = requests.get(url, headers=headers)
     response.raise_for_status()
+    env_data = response.json()
     with open("environment.json", "w") as f:
-        json.dump(response.json(), f)
-    print("Environment downloaded and saved as environment.json")
+        json.dump(env_data, f)
+    print("📁 Environment downloaded and saved as environment.json")
 
 def run_newman_test(company_name, failure_summary):
-    print(f"🚀 Running test for: {company_name}")
+    print(f"\n🚀 Running test for: {company_name}")
+
+    # Safe file and folder names
     safe_name = company_name.replace(" ", "_").replace("&", "")
     result_file = f"result_{safe_name}.json"
-    allure_dir = f"results/allure-results/{safe_name}"
-    os.makedirs(allure_dir, exist_ok=True)
+    html_dir = f"results/htmlextra-reports/{safe_name}"
+    html_report = os.path.join(html_dir, "report.html")
+    os.makedirs(html_dir, exist_ok=True)
 
     command = [
         "newman", "run", "collection.json",
         "-e", "environment.json",
         "--global-var", f"companyName={company_name}",
-        "--reporters", "json,allure",
+        "--reporters", "json,htmlextra",
         "--reporter-json-export", result_file,
-        "--reporter-allure-export", allure_dir
+        "--reporter-htmlextra-export", html_report,
+        "--reporter-htmlextra-title", f"Report for {company_name}",
+        "--reporter-htmlextra-darkTheme", "true"
     ]
 
-    try:
-        subprocess.run(command, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-    except subprocess.CalledProcessError:
-        print(f"❌ Newman failed for {company_name}")
-        if os.path.exists(result_file):
-            with open(result_file) as f:
-                result_data = json.load(f)
-            failures = result_data.get("run", {}).get("failures", [])
-            for fail in failures:
+    # Redirect output to log files to prevent Jenkins crash
+    stdout_log = f"{safe_name}_stdout.log"
+    stderr_log = f"{safe_name}_stderr.log"
+
+    with open(stdout_log, "w") as out, open(stderr_log, "w") as err:
+        try:
+            subprocess.run(command, check=True, stdout=out, stderr=err, text=True)
+            print(f"✅ Newman test passed for {company_name}")
+        except subprocess.CalledProcessError:
+            print(f"❌ Newman test failed for {company_name}")
+            if os.path.exists(result_file):
+                with open(result_file) as f:
+                    result_data = json.load(f)
+                failures = []
+                for run in result_data.get("run", {}).get("failures", []):
+                    failures.append({
+                        "file": result_file,
+                        "request": run.get("source", {}).get("name", "Unknown request"),
+                        "error": run.get("error", {}).get("message", "Unknown error")
+                    })
+                failure_summary.extend(failures)
+            else:
                 failure_summary.append({
                     "file": result_file,
-                    "request": fail.get("source", {}).get("name", "Unknown request"),
-                    "error": fail.get("error", {}).get("message", "Unknown error")
+                    "request": company_name,
+                    "error": "Newman run failed and no result file was generated."
                 })
-        else:
-            failure_summary.append({
-                "file": result_file,
-                "request": company_name,
-                "error": "Newman run failed and no result file was generated."
-            })
 
 def main():
     try:
         download_postman_collection()
         download_postman_environment()
     except requests.HTTPError as e:
-        print(f"❌ Failed to download collection or environment: {e}")
+        print(f"❌ Error downloading collection or environment: {e}")
         sys.exit(1)
 
     if not os.path.exists("companies.json"):
-        print("❌ companies.json not found.")
+        print("❌ companies.json not found. Please provide the file with company names.")
         sys.exit(1)
 
     with open("companies.json") as f:
         companies = json.load(f)
 
-    print(f"📦 Total companies to process: {len(companies)}")
+    print(f"\n📦 Total companies to process: {len(companies)}")
+    os.makedirs("results/htmlextra-reports", exist_ok=True)
 
-    os.makedirs("results/allure-results", exist_ok=True)
     failure_summary = []
 
     for company in companies:
-        run_newman_test(company["companyName"], failure_summary)
+        company_name = company["companyName"]
+        run_newman_test(company_name, failure_summary)
 
     if failure_summary:
         with open("failed_tests_summary.json", "w") as f:
             json.dump(failure_summary, f, indent=2)
-        print(f"📋 Failure summary: {len(failure_summary)} failed tests written to failed_tests_summary.json")
+        print(f"\n📋 Failure summary: {len(failure_summary)} failed tests written to failed_tests_summary.json")
     else:
-        print("✅ All Newman tests completed successfully.")
+        print("\n✅ All Newman tests completed successfully.")
 
 if __name__ == "__main__":
-    print("+ python3 main_runner.py")
     main()
