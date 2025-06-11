@@ -23,22 +23,31 @@ REPORT_DIR = "./reports"
 HTML_REPORT = os.path.join(REPORT_DIR, "htmlreport.html")
 JSON_REPORT = os.path.join(REPORT_DIR, "report.json")
 
-# Determine DATA_FILE based on input
-DATA_FILE = "companies.json"  # default
+# Determine DATA_FILE
+DATA_FILE = "companies.json"  # default fallback
 
-def handle_input_data():
+def determine_data_file():
     global DATA_FILE
+
+    # 1. Check if uploaded file exists (via Jenkins file param)
+    uploaded_file = "CUSTOM_JSON_FILE"
+    if os.path.exists(uploaded_file):
+        DATA_FILE = uploaded_file
+        print(f"Using uploaded JSON file: {DATA_FILE}")
+        return
+
+    # 2. Check if JSON text is passed as CLI argument
     if len(sys.argv) > 1:
         try:
             input_data = json.loads(sys.argv[1])
             with open("file.json", "w") as f:
                 json.dump(input_data, f, indent=2)
             DATA_FILE = "file.json"
-            print("Custom data received from Jenkins and saved to file.json")
+            print("JSON data received via CLI and saved to file.json")
         except json.JSONDecodeError:
-            print("Failed to decode input data. Falling back to companies.json")
+            print("Invalid JSON passed via CLI. Falling back to default companies.json")
     else:
-        print("No input data passed. Using default companies.json")
+        print("No custom input provided. Using default companies.json")
 
 def download_postman_collection():
     print("Downloading Postman collection...")
@@ -71,6 +80,6 @@ def run_newman():
         exit(1)
 
 if __name__ == "__main__":
-    handle_input_data()
+    determine_data_file()
     download_postman_collection()
     run_newman()
