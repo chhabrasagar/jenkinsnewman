@@ -51,7 +51,7 @@ def generate_presigned_url(s3_key):
         url = s3.generate_presigned_url(
             'get_object',
             Params={'Bucket': BUCKET_NAME, 'Key': s3_key},
-            ExpiresIn=86400  # 1 hour
+            ExpiresIn=86400
         )
         print(f"\n🔗 Pre-signed URL (valid for 1 hour):\n{url}")
     except Exception as e:
