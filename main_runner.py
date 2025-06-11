@@ -10,8 +10,17 @@ BASE_URL = os.getenv('BASE_URL')
 WEB_TOKEN = os.getenv('WEB_TOKEN')
 EMAIL = os.getenv('EMAIL')
 
-if not all([POSTMAN_API_KEY, COLLECTION_UID, BASE_URL, WEB_TOKEN, EMAIL]):
-    raise Exception("Missing one or more required environment variables.")
+# Validate required environment variables
+required_env_vars = {
+    "POSTMAN_API_KEY": POSTMAN_API_KEY,
+    "COLLECTION_UID": COLLECTION_UID,
+    "BASE_URL": BASE_URL,
+    "WEB_TOKEN": WEB_TOKEN,
+    "EMAIL": EMAIL
+}
+missing_vars = [k for k, v in required_env_vars.items() if not v]
+if missing_vars:
+    raise Exception(f"Missing required environment variables: {', '.join(missing_vars)}")
 
 AUTH_TOKEN = {
     "email": EMAIL,
@@ -27,7 +36,6 @@ def download_postman_collection():
     response.raise_for_status()
     collection_data = response.json()
 
-    # Save only the 'collection' object as expected by Newman
     with open("collection.json", "w") as f:
         json.dump(collection_data["collection"], f)
     
@@ -35,35 +43,40 @@ def download_postman_collection():
 
 def run_newman_for_each():
     print("Starting Newman runs...")
-    
+
     with open("companies.json", "r") as f:
         companies = json.load(f)
 
-    os.makedirs("results/htmlextra-reports", exist_ok=True)
+    base_report_dir = "results/htmlextra-reports"
+    os.makedirs(base_report_dir, exist_ok=True)
 
     for item in companies:
         company = item["companyName"]
         module = item["module"]
-        safe_name = f"{company}_{module}".replace(" ", "_").replace("&", "").replace("/", "_")
+        safe_company_name = company.replace(" ", "_").replace("&", "").replace("/", "_")
+        safe_module_name = module.replace(" ", "_").replace("&", "").replace("/", "_")
 
-        # Add auth token and base_url to each data entry
+        company_report_dir = os.path.join(base_report_dir, safe_company_name)
+        os.makedirs(company_report_dir, exist_ok=True)
+
+        # Prepare iteration data
         data_entry = {
             **item,
             "base_url": BASE_URL,
             "Auth-Token": auth_token_str
         }
 
-        # Write individual iteration data
-        temp_data_file = f"temp_data_{safe_name}.json"
+        temp_data_file = f"temp_data_{safe_company_name}_{safe_module_name}.json"
         with open(temp_data_file, "w") as f:
             json.dump([data_entry], f)
 
-        # Report paths
-        result_file = f"results/result_{safe_name}.json"
-        html_report = f"results/htmlextra-reports/{safe_name}.html"
+        result_file = f"results/result_{safe_company_name}_{safe_module_name}.json"
+        html_report = os.path.join(company_report_dir, f"{safe_module_name}.html")
 
         command = [
             "newman", "run", "collection.json",
+            "--env-var", f"base_url={BASE_URL}",
+            "--env-var", f"Auth-Token={auth_token_str}",
             "--iteration-data", temp_data_file,
             "--reporters", "json,htmlextra",
             "--reporter-json-export", result_file,
@@ -72,14 +85,16 @@ def run_newman_for_each():
             "--reporter-htmlextra-darkTheme", "true"
         ]
 
-        print(f"Running Newman for {company} ({module})")
+        print(f"\n Running Newman for: {company} ({module})")
         result = subprocess.run(command, capture_output=True, text=True)
 
         if result.returncode == 0:
-            print(f"Passed: {company} - {module}")
+            print(f"PASSED: {company} - {module}")
         else:
-            print(f"Failed: {company} - {module}")
+            print(f"FAILED: {company} - {module}")
+            print("---- STDOUT ----")
             print(result.stdout)
+            print("---- STDERR ----")
             print(result.stderr)
 
         os.remove(temp_data_file)
