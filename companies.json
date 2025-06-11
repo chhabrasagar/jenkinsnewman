@@ -1,8 +1,18 @@
 [
     {
-        "companyName": "ASSAM PETRO CHEMICALS LTD"
+        "companyName": "ASSAM PETRO CHEMICALS LTD",
+        "module": "SUMMARY"
     },
     {
-        "companyName": "ORTHO CLINICAL DIAGNOSTICS INDIA PRIVATE LIMITED"
+        "companyName": "ORTHO CLINICAL DIAGNOSTICS INDIA PRIVATE LIMITED",
+        "module": "COMPANY"
+    },
+    {
+        "companyName": "ASSAM PETRO CHEMICALS LTD",
+        "module": "COMPANY"
+    },
+    {
+        "companyName": "ORTHO CLINICAL DIAGNOSTICS INDIA PRIVATE LIMITED",
+        "module": "EXTERNAL_RATINGS"
     }
 ]
