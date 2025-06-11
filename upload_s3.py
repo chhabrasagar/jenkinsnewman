@@ -14,6 +14,16 @@ timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
 S3_KEY = f"reports/htmlreport_{timestamp}.html"  # file name in S3
 
 def upload_report():
+    # Generate timestamped filename
+    timestamp = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+    local_file = 'reports/htmlreport.html'
+    s3_key = f'reports/htmlreport_{timestamp}.html'
+
+    if not os.path.exists(local_file):
+        print(f"Report not found at {local_file}")
+        return
+
+    # Upload to S3
     s3 = boto3.client(
         's3',
         aws_access_key_id=AWS_ACCESS_KEY,
@@ -22,10 +32,32 @@ def upload_report():
     )
 
     try:
-        s3.upload_file(REPORT_FILE_PATH, BUCKET_NAME, S3_KEY)
-        print(f"✅ Report uploaded successfully to s3://{BUCKET_NAME}/{S3_KEY}")
+        s3.upload_file(local_file, BUCKET_NAME, s3_key)
+        print(f"Report uploaded successfully to s3://{BUCKET_NAME}/{s3_key}")
+        return s3_key
     except Exception as e:
-        print(f"❌ Failed to upload report: {e}")
+        print(f"Failed to upload report: {e}")
+        return None
+
+def generate_presigned_url(s3_key):
+    s3 = boto3.client(
+        's3',
+        aws_access_key_id=AWS_ACCESS_KEY,
+        aws_secret_access_key=AWS_SECRET_KEY,
+        region_name=REGION_NAME
+    )
+
+    try:
+        url = s3.generate_presigned_url(
+            'get_object',
+            Params={'Bucket': BUCKET_NAME, 'Key': s3_key},
+            ExpiresIn=3600  # 1 hour
+        )
+        print(f"\n🔗 Pre-signed URL (valid for 1 hour):\n{url}")
+    except Exception as e:
+        print(f"Could not generate pre-signed URL: {e}")
 
 if __name__ == "__main__":
-    upload_report()
+    uploaded_key = upload_report()
+    if uploaded_key:
+        generate_presigned_url(uploaded_key)
