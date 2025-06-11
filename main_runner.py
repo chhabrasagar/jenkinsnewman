@@ -1,7 +1,6 @@
 import json
 import os
 import subprocess
-import sys
 import requests
 
 # Postman API details
@@ -19,35 +18,10 @@ auth_token_str = json.dumps(AUTH_TOKEN)
 
 COLLECTION_FILE = "collection.json"
 ENV_FILE = "environment.json"
+DATA_FILE = "companies.json"
 REPORT_DIR = "./reports"
 HTML_REPORT = os.path.join(REPORT_DIR, "htmlreport.html")
 JSON_REPORT = os.path.join(REPORT_DIR, "report.json")
-
-# Determine DATA_FILE
-DATA_FILE = "companies.json"  # default fallback
-
-def determine_data_file():
-    global DATA_FILE
-
-    # 1. Check if uploaded file exists (via Jenkins file param)
-    uploaded_file = "CUSTOM_JSON_FILE"
-    if os.path.exists(uploaded_file):
-        DATA_FILE = uploaded_file
-        print(f"Using uploaded JSON file: {DATA_FILE}")
-        return
-
-    # 2. Check if JSON text is passed as CLI argument
-    if len(sys.argv) > 1:
-        try:
-            input_data = json.loads(sys.argv[1])
-            with open("file.json", "w") as f:
-                json.dump(input_data, f, indent=2)
-            DATA_FILE = "file.json"
-            print("JSON data received via CLI and saved to file.json")
-        except json.JSONDecodeError:
-            print("Invalid JSON passed via CLI. Falling back to default companies.json")
-    else:
-        print("No custom input provided. Using default companies.json")
 
 def download_postman_collection():
     print("Downloading Postman collection...")
@@ -61,7 +35,7 @@ def download_postman_collection():
     print(f"Collection saved as {COLLECTION_FILE}")
 
 def run_newman():
-    print(f"Running Newman with data file: {DATA_FILE}")
+    print("Running Newman collection...")
     os.makedirs(REPORT_DIR, exist_ok=True)
     command = [
         "newman", "run", COLLECTION_FILE,
@@ -80,6 +54,5 @@ def run_newman():
         exit(1)
 
 if __name__ == "__main__":
-    determine_data_file()
     download_postman_collection()
     run_newman()
