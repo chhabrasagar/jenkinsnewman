@@ -53,7 +53,7 @@ def generate_presigned_url(s3_key):
             Params={'Bucket': BUCKET_NAME, 'Key': s3_key},
             ExpiresIn=86400
         )
-        print(f"\n🔗 Pre-signed URL (valid for 1 hour):\n{url}")
+        print(f"\n Pre-signed URL (valid for 24 hour):\n{url}")
     except Exception as e:
         print(f"Could not generate pre-signed URL: {e}")
 
