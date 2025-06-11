@@ -86,5 +86,4 @@ def run_newman_for_each():
 
 if __name__ == "__main__":
     download_postman_collection()
-    import pdb;pdb.set_trace()
     run_newman_for_each()
