@@ -1,0 +1,7 @@
+boto3
+requests==2.32.4
+python-dotenv==1.0.1
+urllib3==1.26.14
+chardet==4.0.0
+paramiko>=3.0
+cryptography>=42.0.0

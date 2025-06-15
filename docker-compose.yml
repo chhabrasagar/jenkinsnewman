@@ -1,0 +1,23 @@
+version: "3.8"
+
+services:
+  ocr_service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./companies.json:/app/companies.json:ro
+    env_file:
+      - .env
+    restart: "no"
+    command: ["python", "./api_testing_script/main_runner.py"]
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 4096M
+        reservations:
+          cpus: '0.5'
+          memory: 512M
